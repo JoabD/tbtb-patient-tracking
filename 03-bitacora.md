@@ -30,6 +30,14 @@ Formato: fecha · decisión · motivo · propuesta de (yo / asistente).
 - 2026-09-23 · Tipos de documento limitados a Cédula, DNI y Pasaporte, sin reglas por país · No se conoce el contexto de otros países y hay poco tiempo · yo.
 - 2026-09-23 · Esquema versionado con migraciones de EF Core, más scripts SQL en `scripts/` generados de esas migraciones, y migraciones aplicadas al arrancar en Development · Cumple el requisito de `scripts/` de la prueba y permite que el evaluador arranque con `dotnet run` · asistente propuso, yo aprobé.
 - 2026-09-23 · Clean Architecture ligera (Domain, Application, Infrastructure, Api), sin MediatR, CQRS ni Unit of Work propio · Cumple la separación de capas del Anexo A sin sobreingeniería en el tiempo disponible · yo, con el asistente.
+- 2026-09-23 · **Cambio posterior al plan (valores):** los valores de los catálogos se guardan en inglés en la base y el código: `Cedula`/`Dni`/`Passport`, `Reachable`/`Unreachable`, `Contacted`/`NoAnswer`/`WrongNumber`, y `Call`/`WhatsApp`/`Email` para el canal. Las etiquetas en español se muestran solo en la interfaz · El plan tenía textos en español con espacios y tildes ('No contesta', 'Cédula'), incómodos como valores de base de datos y de código · asistente propuso, yo decidí el alcance (solo esos valores).
+- 2026-09-23 · **Rechazo:** el asistente sugirió `nvarchar` para nombres, ciudad, correo y observaciones. Se mantiene `varchar` en todo el texto, como en el plan · Por tiempo, y porque la collation por defecto de SQL Server Express admite tildes y "ñ" en `varchar` · asistente propuso, yo rechacé.
+- 2026-09-23 · Nombre de la solución y proyectos `TbtbPatientTracking.*` y base de datos `tbtb-patient-tracking` en `localhost\SQLEXPRESS`. La cadena `emissions-advisor-apps` era solo un ejemplo · Coincide con el nombre del repositorio · yo.
+- 2026-09-23 · Los campos `IsActive` e `IsDeleted` se configuran con valor por defecto en la base y `ValueGeneratedNever()` · Sin eso, EF Core omite el valor `false` al insertar y la base aplicaría el default `true` en `IsActive`, dejando activo a un paciente que se quiso inactivo · asistente propuso, yo aprobé tras entender la razón.
+- 2026-09-23 · Datos de prueba solo por script SQL (`scripts/002_datos_prueba.sql`), sin `HasData` en las migraciones · La prueba pide un script de carga y así el esquema y los datos quedan separados · asistente propuso, yo aprobé.
+- 2026-09-23 · La solución de .NET vive en `api/` (con `src/` y `tests/`), el proyecto Angular irá en `web/`, y `scripts/` queda en la raíz · Estructura más limpia y coincide con la que pide la prueba · yo.
+- 2026-09-23 · Herramienta `dotnet-ef` fijada en 8.0.31 (había una 9.0.2 instalada) · Alinea las herramientas con EF Core 8 y evita diferencias en la migración y el script · asistente propuso, yo ejecuté.
+- 2026-09-23 · `scripts/002_datos_prueba.sql` incluye `SET QUOTED_IDENTIFIER ON` · Al probarlo con `sqlcmd` falló el insert en `Contacts`: SQL Server exige esa opción para tablas con índice filtrado y `sqlcmd` la trae apagada. Lo detecté al ejecutar el script sobre la base real · error del asistente, encontrado en la verificación.
 
 ## 4. Bitácora por commit
 
@@ -43,8 +51,8 @@ Formato: fecha · decisión · motivo · propuesta de (yo / asistente).
 - Propuesta de: yo, con revisión del asistente
 - Rechazos o correcciones: se corrigieron dos supuestos cruzados en los hallazgos y se restauró el formato de tabla y de seis secciones que yo había definido.
 
-### Commit 2: (pendiente de mensaje)
-- Hash: (se completa al inicio de la siguiente fase)
+### Commit 2: Fase 0: Agregado de Bitacora y .gitignore previendo la adicion del proyecto angular y .Net
+- Hash: `34f2970`
 - Fase: 0
 - Qué cambió y por qué: base del repositorio (`.gitignore`, `.gitattributes`, `.editorconfig`) y esqueleto de la bitácora con las dos desviaciones respecto al plan ya commiteado.
 - Archivos principales: `.gitignore`, `.gitattributes`, `.editorconfig`, `03-bitacora.md`
@@ -52,3 +60,13 @@ Formato: fecha · decisión · motivo · propuesta de (yo / asistente).
 - Prueba que lo verifica: no aplica
 - Propuesta de: asistente, aprobada por mí (incluido `.gitattributes`)
 - Rechazos o correcciones: ninguno en esta fase.
+
+### Commit 3: (pendiente de mensaje)
+- Hash: (se completa al inicio de la siguiente fase)
+- Fase: 1
+- Qué cambió y por qué: solución en capas dentro de `api/` (Domain, Application, Infrastructure, Api y Tests), entidades y enums, configuración de EF Core con los índices del plan, migración `InitialCreate`, `Program.cs` que aplica migraciones al arrancar en Development, `appsettings.Example.json`, y los scripts `001_esquema.sql` (generado de la migración) y `002_datos_prueba.sql` (9 pacientes y 22 contactos). Verificado contra SQL Server Express: la base se creó y el script de datos cargó 9 pacientes y 22 contactos.
+- Archivos principales: `api/src/TbtbPatientTracking.Domain/*`, `api/src/TbtbPatientTracking.Infrastructure/Persistence/*`, `api/src/TbtbPatientTracking.Infrastructure/Migrations/*`, `api/src/TbtbPatientTracking.Api/Program.cs`, `scripts/001_esquema.sql`, `scripts/002_datos_prueba.sql`
+- Criterio relacionado: base de CA-1 y CA-2 (modelo de datos)
+- Prueba que lo verifica: pendiente (las pruebas empiezan en la Fase 2). Verificación manual: conteos en la base.
+- Propuesta de: asistente, con decisiones mías sobre valores, tipos, nombres y estructura de carpetas
+- Rechazos o correcciones: rechacé `nvarchar` y mantuve `varchar` (ver registro de decisiones). Los valores de los catálogos pasaron de español a inglés por decisión mía sobre el alcance. Se corrigió un error del script de datos (`QUOTED_IDENTIFIER`).

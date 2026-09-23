@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{809FC825-D771-451E-8633-4E18943BE251}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TbtbPatientTracking.Domain", "src\TbtbPatientTracking.Domain\TbtbPatientTracking.Domain.csproj", "{16BFB611-E8C1-4480-9481-E8834E776323}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TbtbPatientTracking.Application", "src\TbtbPatientTracking.Application\TbtbPatientTracking.Application.csproj", "{38BEA125-127A-4CD7-A5EE-985FF2CBBF3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TbtbPatientTracking.Infrastructure", "src\TbtbPatientTracking.Infrastructure\TbtbPatientTracking.Infrastructure.csproj", "{6BBF75C3-BC3C-4FE6-87E7-F28E4E1C925E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TbtbPatientTracking.Api", "src\TbtbPatientTracking.Api\TbtbPatientTracking.Api.csproj", "{7AB3B125-B8CE-4CC6-AB0B-232FB5DB0919}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A27DA8C7-6E37-44CB-A61A-87B846C6E019}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TbtbPatientTracking.Tests", "tests\TbtbPatientTracking.Tests\TbtbPatientTracking.Tests.csproj", "{BDB8B1B9-DE24-4B18-98DB-EBE06315E512}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16BFB611-E8C1-4480-9481-E8834E776323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16BFB611-E8C1-4480-9481-E8834E776323}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16BFB611-E8C1-4480-9481-E8834E776323}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16BFB611-E8C1-4480-9481-E8834E776323}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38BEA125-127A-4CD7-A5EE-985FF2CBBF3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38BEA125-127A-4CD7-A5EE-985FF2CBBF3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38BEA125-127A-4CD7-A5EE-985FF2CBBF3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38BEA125-127A-4CD7-A5EE-985FF2CBBF3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BBF75C3-BC3C-4FE6-87E7-F28E4E1C925E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BBF75C3-BC3C-4FE6-87E7-F28E4E1C925E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BBF75C3-BC3C-4FE6-87E7-F28E4E1C925E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BBF75C3-BC3C-4FE6-87E7-F28E4E1C925E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AB3B125-B8CE-4CC6-AB0B-232FB5DB0919}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AB3B125-B8CE-4CC6-AB0B-232FB5DB0919}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AB3B125-B8CE-4CC6-AB0B-232FB5DB0919}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AB3B125-B8CE-4CC6-AB0B-232FB5DB0919}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDB8B1B9-DE24-4B18-98DB-EBE06315E512}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDB8B1B9-DE24-4B18-98DB-EBE06315E512}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDB8B1B9-DE24-4B18-98DB-EBE06315E512}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDB8B1B9-DE24-4B18-98DB-EBE06315E512}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{16BFB611-E8C1-4480-9481-E8834E776323} = {809FC825-D771-451E-8633-4E18943BE251}
+		{38BEA125-127A-4CD7-A5EE-985FF2CBBF3E} = {809FC825-D771-451E-8633-4E18943BE251}
+		{6BBF75C3-BC3C-4FE6-87E7-F28E4E1C925E} = {809FC825-D771-451E-8633-4E18943BE251}
+		{7AB3B125-B8CE-4CC6-AB0B-232FB5DB0919} = {809FC825-D771-451E-8633-4E18943BE251}
+		{BDB8B1B9-DE24-4B18-98DB-EBE06315E512} = {A27DA8C7-6E37-44CB-A61A-87B846C6E019}
+	EndGlobalSection
+EndGlobal
