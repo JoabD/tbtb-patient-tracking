@@ -1,0 +1,26 @@
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResults/
+*.log
+
+# Configuración local con datos de conexión (se publica appsettings.Example.json)
+**/appsettings.Development.json
+
+# Angular / Node
+node_modules/
+dist/
+.angular/
+web/.angular/
+npm-debug.log*
+coverage/
+
+# Editores y sistema operativo
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+.DS_Store

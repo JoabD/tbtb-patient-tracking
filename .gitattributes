@@ -1,0 +1,4 @@
+# Normaliza saltos de línea para evitar ruido en los diffs entre Windows y otros sistemas
+* text=auto
+*.sql text eol=lf
+*.md text eol=lf
