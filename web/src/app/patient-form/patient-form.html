@@ -1,0 +1,95 @@
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (errorMessage(); as message) {
+    <div class="banner banner-error" role="alert">{{ message }}</div>
+  }
+  @if (successMessage(); as message) {
+    <div class="banner banner-success" role="status">{{ message }}</div>
+  }
+
+  <div class="field">
+    <label for="patient-fullName">Nombre completo</label>
+    <input id="patient-fullName" type="text" formControlName="fullName" />
+    <app-field-error [control]="form.controls.fullName" />
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="patient-documentType">Tipo de documento</label>
+      <select id="patient-documentType" formControlName="documentType">
+        <option value="">Seleccione…</option>
+        @for (option of documentTypes; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      <app-field-error [control]="form.controls.documentType" />
+    </div>
+
+    <div class="field">
+      <label for="patient-documentNumber">Número de documento</label>
+      <input id="patient-documentNumber" type="text" formControlName="documentNumber" />
+      <app-field-error [control]="form.controls.documentNumber" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="patient-country">País</label>
+      <select id="patient-country" formControlName="country">
+        <option value="">Seleccione…</option>
+        @for (option of countries; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      <app-field-error [control]="form.controls.country" />
+    </div>
+
+    <div class="field">
+      <label for="patient-city">Ciudad</label>
+      <input id="patient-city" type="text" formControlName="city" />
+      <app-field-error [control]="form.controls.city" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="patient-phone">Teléfono</label>
+      <input id="patient-phone" type="tel" formControlName="phone" placeholder="+573001234567" />
+      <app-field-error [control]="form.controls.phone" />
+    </div>
+
+    <div class="field">
+      <label for="patient-email">Correo (opcional)</label>
+      <input id="patient-email" type="email" formControlName="email" />
+      <app-field-error [control]="form.controls.email" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="patient-treatmentStartDate">Inicio de tratamiento</label>
+      <input id="patient-treatmentStartDate" type="date" formControlName="treatmentStartDate" />
+      <app-field-error [control]="form.controls.treatmentStartDate" />
+    </div>
+
+    <div class="field">
+      <label for="patient-gestorUsername">Usuario del gestor</label>
+      <input id="patient-gestorUsername" type="text" formControlName="gestorUsername" />
+      <app-field-error [control]="form.controls.gestorUsername" />
+    </div>
+  </div>
+
+  <div class="field field-check">
+    <label>
+      <input type="checkbox" formControlName="privacyAccepted" />
+      El paciente aceptó el aviso de privacidad (texto legal pendiente de entrega por el área legal).
+    </label>
+    <app-field-error
+      [control]="form.controls.privacyAccepted"
+      requiredMessage="Debe confirmarse la aceptación del aviso de privacidad."
+    />
+  </div>
+
+  <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+    {{ submitting() ? 'Registrando…' : 'Registrar paciente' }}
+  </button>
+</form>

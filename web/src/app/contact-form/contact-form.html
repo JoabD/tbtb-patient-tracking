@@ -1,0 +1,63 @@
+<p class="context">
+  Paciente: <strong>{{ patient().fullName }}</strong> ({{ patient().documentNumber }})
+</p>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (errorMessage(); as message) {
+    <div class="banner banner-error" role="alert">{{ message }}</div>
+  }
+  @if (successMessage(); as message) {
+    <div class="banner banner-success" role="status">{{ message }}</div>
+  }
+
+  <div class="row">
+    <div class="field">
+      <label for="contact-gestorUsername">Usuario del gestor</label>
+      <input id="contact-gestorUsername" type="text" formControlName="gestorUsername" />
+      <app-field-error [control]="form.controls.gestorUsername" />
+    </div>
+
+    <div class="field">
+      <label for="contact-contactDate">Fecha y hora del contacto</label>
+      <input id="contact-contactDate" type="datetime-local" formControlName="contactDate" [max]="maxDate" />
+      <app-field-error [control]="form.controls.contactDate" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="contact-channel">Canal</label>
+      <select id="contact-channel" formControlName="channel">
+        <option value="">Seleccione…</option>
+        @for (option of channels; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      <app-field-error [control]="form.controls.channel" />
+    </div>
+
+    <div class="field">
+      <label for="contact-resultCode">Resultado</label>
+      <select id="contact-resultCode" formControlName="resultCode">
+        <option value="">Seleccione…</option>
+        @for (option of results; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      <app-field-error [control]="form.controls.resultCode" />
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="contact-observations">Observaciones (opcional)</label>
+    <textarea id="contact-observations" rows="3" formControlName="observations"></textarea>
+    <app-field-error [control]="form.controls.observations" />
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+      {{ submitting() ? 'Registrando…' : 'Registrar contacto' }}
+    </button>
+    <button type="button" class="btn" (click)="cancelled.emit()">Cerrar</button>
+  </div>
+</form>

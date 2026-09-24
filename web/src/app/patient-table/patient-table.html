@@ -1,0 +1,79 @@
+@if (errorMessage(); as message) {
+  <div class="banner banner-error" role="alert">
+    {{ message }}
+    <button type="button" class="btn btn-small" (click)="reload()">Reintentar</button>
+  </div>
+}
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Paciente</th>
+        <th>Documento</th>
+        <th>País y ciudad</th>
+        <th>Teléfono</th>
+        <th>Seguimiento</th>
+        <th>Estado</th>
+        <th class="num">Contactos</th>
+        <th>Último contacto</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (patient of data()?.items ?? []; track patient.id) {
+        <tr>
+          <td>{{ patient.fullName }}</td>
+          <td>{{ documentLabel(patient) }}</td>
+          <td>{{ countryLabel(patient.country) }}, {{ patient.city }}</td>
+          <td>{{ patient.phone }}</td>
+          <td>{{ trackingLabel(patient.trackingStatus) }}</td>
+          <td>
+            <span class="tag" [class.tag-off]="!patient.isActive">{{ patient.isActive ? 'Activo' : 'Inactivo' }}</span>
+          </td>
+          <td class="num">{{ patient.contactCount }}</td>
+          <td>
+            @if (patient.lastContact; as last) {
+              {{ last.contactDate | date: 'dd/MM/yyyy HH:mm' }}<br />
+              <small>{{ channelLabel(last.channel) }} · {{ resultLabel(last.resultCode) }} · {{ last.gestorUsername }}</small>
+            } @else {
+              <span class="muted">Sin contactos</span>
+            }
+          </td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-small"
+              [disabled]="!patient.isActive"
+              [attr.title]="patient.isActive ? null : 'Un paciente inactivo no admite nuevos contactos'"
+              (click)="contactRequested.emit(patient)"
+            >
+              Registrar contacto
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="9" class="muted">
+            {{ loading() ? 'Cargando…' : 'Todavía no hay pacientes registrados.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<div class="pager">
+  <button type="button" class="btn btn-small" [disabled]="page() <= 1 || loading()" (click)="goTo(page() - 1)">
+    Anterior
+  </button>
+  <span>Página {{ page() }} de {{ totalPages() }} · {{ data()?.totalCount ?? 0 }} pacientes</span>
+  <button
+    type="button"
+    class="btn btn-small"
+    [disabled]="page() >= totalPages() || loading()"
+    (click)="goTo(page() + 1)"
+  >
+    Siguiente
+  </button>
+</div>
