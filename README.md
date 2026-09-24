@@ -34,18 +34,26 @@ scripts/                     Scripts SQL (esquema y datos de prueba)
 
 **Cadena de conexión.** Copia `api\src\TbtbPatientTracking.Api\appsettings.Example.json` como `api\src\TbtbPatientTracking.Api\appsettings.Development.json` y ajústala si tu instancia no es `localhost\SQLEXPRESS`. Ese archivo no se sube a git.
 
-**Opción A (recomendada): migraciones automáticas.** En Development el API aplica las migraciones al arrancar y crea la base `tbtb-patient-tracking` si no existe. No hace falta hacer nada más.
+**Opción A (recomendada): migraciones automáticas.** En Development el API aplica las migraciones al arrancar y crea la base `tbtb-patient-tracking` si no existe. La base queda **vacía**: para cargar los datos de prueba corre además el paso opcional de abajo.
+
+**Datos de prueba (opcional, con cualquiera de las dos opciones).** Con la API ya iniciada al menos una vez (opción A) o con el esquema ya creado (opción B). Desde una terminal, **en la raíz del repositorio** (la ruta es relativa):
+
+```
+sqlcmd -S localhost\SQLEXPRESS -E -I -i scripts\002_datos_prueba.sql
+```
+
+Al terminar debe haber 9 pacientes y 22 contactos. Si no tienes `sqlcmd`, abre el script en SSMS y ejecútalo completo (ahí no hace falta `-I`). El script usa la base `tbtb-patient-tracking` (lleva un `USE` propio, así que sirve el nombre por defecto; si cambiaste el nombre de la base, edita esa línea).
 
 **Opción B: scripts SQL.** Primero crea la base vacía y luego corre los scripts en orden. Desde una terminal, en la raíz del repositorio:
 
 ```
 sqlcmd -S localhost\SQLEXPRESS -E -Q "IF DB_ID('tbtb-patient-tracking') IS NULL CREATE DATABASE [tbtb-patient-tracking]"
 sqlcmd -S localhost\SQLEXPRESS -E -d tbtb-patient-tracking -I -i scripts\001_esquema.sql
-sqlcmd -S localhost\SQLEXPRESS -E -d tbtb-patient-tracking -I -i scripts\002_datos_prueba.sql
+sqlcmd -S localhost\SQLEXPRESS -E -I -i scripts\002_datos_prueba.sql
 ```
 
 - `001_esquema.sql` es el script idempotente generado de la migración `InitialCreate`.
-- `002_datos_prueba.sql` carga datos ficticios: 9 pacientes (3 por país, entre ellos un paciente ilocalizable y uno inactivo) y 22 contactos. Se puede correr varias veces sin duplicar filas.
+- `002_datos_prueba.sql` (el mismo del paso opcional) carga datos ficticios: 9 pacientes (3 por país, entre ellos un paciente ilocalizable y uno inactivo) y 22 contactos. Se puede correr varias veces sin duplicar filas.
 - La opción `-I` de `sqlcmd` es necesaria: el índice filtrado de `Contacts` exige `QUOTED_IDENTIFIER ON` y `sqlcmd` lo trae apagado. Si `sqlcmd` reclama por el certificado, agrega `-C`. También se pueden abrir los scripts en SSMS.
 
 Si usas la opción B, el API detecta que la migración ya está aplicada y no la repite.
