@@ -8,4 +8,13 @@ public interface IPatientService
     Task<ServiceResult<PatientResponse>> RegisterAsync(
         RegisterPatientRequest request,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Listado de pacientes, del más reciente al más antiguo, con el total de contactos vigentes
+    /// y el último contacto de cada uno.
+    /// </summary>
+    Task<ServiceResult<PagedResponse<PatientListItemResponse>>> ListAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }

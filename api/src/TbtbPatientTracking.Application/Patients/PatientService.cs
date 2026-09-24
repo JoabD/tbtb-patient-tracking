@@ -80,6 +80,113 @@ public class PatientService(
         return ServiceResult<PatientResponse>.Ok(PatientResponse.FromEntity(patient));
     }
 
+    public async Task<ServiceResult<PagedResponse<PatientListItemResponse>>> ListAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var errors = new Dictionary<string, string[]>();
+        if (page < 1 || page > Pagination.MaxPage)
+        {
+            errors["page"] = [$"La página debe estar entre 1 y {Pagination.MaxPage}."];
+        }
+
+        if (pageSize < 1 || pageSize > Pagination.MaxPageSize)
+        {
+            errors["pageSize"] = [$"El tamaño de página debe estar entre 1 y {Pagination.MaxPageSize}."];
+        }
+
+        if (errors.Count > 0)
+        {
+            return ServiceResult<PagedResponse<PatientListItemResponse>>.Invalid(errors);
+        }
+
+        var totalCount = await db.Patients.CountAsync(cancellationToken);
+
+        // Consulta combinada de Patients y Contacts (Anexo A). Primero se pagina Patients y, solo para las filas
+        // de esa página, se calculan dos subconsultas correlacionadas por PatientId: el total de contactos vigentes
+        // y el último contacto. Ambas se apoyan en IX_Contacts_PatientId_ContactDate (filtrado por IsDeleted = 0).
+        // Los contactos anulados se excluyen. El detalle de la justificación está en la bitácora.
+        var rows = await db.Patients
+            .AsNoTracking()
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenBy(p => p.Id) // desempate para que la paginación sea estable
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new PatientListRow(
+                p.Id,
+                p.FullName,
+                p.DocumentType,
+                p.DocumentNumber,
+                p.Country,
+                p.City,
+                p.Phone,
+                p.Email,
+                p.TreatmentStartDate,
+                p.TrackingStatus,
+                p.IsActive,
+                p.CreatedAt,
+                p.Contacts.Count(c => !c.IsDeleted),
+                p.Contacts
+                    .Where(c => !c.IsDeleted)
+                    .OrderByDescending(c => c.ContactDate)
+                    .ThenByDescending(c => c.CreatedAt)
+                    .Select(c => new LastContactRow(c.ContactDate, c.Channel, c.ResultCode, c.GestorUsername))
+                    .FirstOrDefault()))
+            .ToListAsync(cancellationToken);
+
+        // Los enums se pasan a texto en memoria, no en SQL, para no depender de cómo los traduzca el proveedor.
+        var items = rows
+            .Select(r => new PatientListItemResponse(
+                r.Id,
+                r.FullName,
+                r.DocumentType.ToString(),
+                r.DocumentNumber,
+                r.Country.ToString(),
+                r.City,
+                r.Phone,
+                r.Email,
+                r.TreatmentStartDate,
+                r.TrackingStatus.ToString(),
+                r.IsActive,
+                r.CreatedAt,
+                r.ContactCount,
+                r.LastContact is null
+                    ? null
+                    : new LastContactResponse(
+                        r.LastContact.ContactDate,
+                        r.LastContact.Channel.ToString(),
+                        r.LastContact.ResultCode.ToString(),
+                        r.LastContact.GestorUsername)))
+            .ToList();
+
+        return ServiceResult<PagedResponse<PatientListItemResponse>>.Ok(
+            new PagedResponse<PatientListItemResponse>(items, page, pageSize, totalCount));
+    }
+
+    // Filas intermedias de la proyección. Son privadas: solo existen para que EF traiga los datos en una consulta.
+    private sealed record LastContactRow(
+        DateTimeOffset ContactDate,
+        ContactChannel Channel,
+        ContactResult ResultCode,
+        string GestorUsername);
+
+    private sealed record PatientListRow(
+        Guid Id,
+        string FullName,
+        DocumentType DocumentType,
+        string DocumentNumber,
+        CountryCode Country,
+        string City,
+        string Phone,
+        string? Email,
+        DateOnly TreatmentStartDate,
+        TrackingStatus TrackingStatus,
+        bool IsActive,
+        DateTimeOffset CreatedAt,
+        int ContactCount,
+        LastContactRow? LastContact);
+
     private Task<bool> DocumentExistsAsync(
         CountryCode country,
         DocumentType documentType,

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TbtbPatientTracking.Api.Extensions;
+using TbtbPatientTracking.Application.Common;
 using TbtbPatientTracking.Application.Patients;
 
 namespace TbtbPatientTracking.Api.Controllers;
@@ -22,5 +23,18 @@ public class PatientsController(IPatientService patientService) : ControllerBase
 
         // 201 sin cabecera Location: todavía no existe un GET por id al que apuntar.
         return result.ToActionResult(this, patient => StatusCode(StatusCodes.Status201Created, patient));
+    }
+
+    /// <summary>Lista pacientes (más recientes primero) con total de contactos y último contacto.</summary>
+    [HttpGet]
+    [ProducesResponseType(typeof(PagedResponse<PatientListItemResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> List(
+        CancellationToken cancellationToken,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = Pagination.DefaultPageSize)
+    {
+        var result = await patientService.ListAsync(page, pageSize, cancellationToken);
+        return result.ToActionResult(this, page => Ok(page));
     }
 }
