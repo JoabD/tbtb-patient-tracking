@@ -4,6 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { Subject, of, throwError } from 'rxjs';
 
 import { PatientResponse } from '../models/api.models';
+import { GestorContext } from '../services/gestor-context';
 import { PatientApiService } from '../services/patient-api.service';
 import { PatientForm } from './patient-form';
 
@@ -125,7 +126,7 @@ describe('PatientForm', () => {
     expect(pending.observed).toBeFalse();
   });
 
-  it('envía el correo vacío como null, avisa del éxito, emite el paciente y conserva el usuario del gestor', () => {
+  it('envía el correo vacío como null, emite el paciente y recuerda el usuario del gestor', () => {
     api.registerPatient.and.returnValue(of(createdPatient));
     const emitted: PatientResponse[] = [];
     fixture.componentInstance.registered.subscribe((p) => emitted.push(p));
@@ -134,9 +135,27 @@ describe('PatientForm', () => {
     submit();
 
     expect(api.registerPatient.calls.mostRecent().args[0].email).toBeNull();
-    expect(element.querySelector('.banner-success')?.textContent).toContain('Ana Rodríguez');
     expect(emitted).toEqual([createdPatient]);
-    expect(form().getRawValue()['fullName']).toBe('');
-    expect(form().getRawValue()['gestorUsername']).toBe('gestor.demo');
+    expect(TestBed.inject(GestorContext).username()).toBe('gestor.demo');
+  });
+
+  it('precarga el usuario del gestor recordado', () => {
+    TestBed.inject(GestorContext).username.set('gestor.previo');
+
+    const other = TestBed.createComponent(PatientForm);
+    other.detectChanges();
+
+    const otherForm = (other.componentInstance as unknown as { form: FormGroup }).form;
+    expect(otherForm.getRawValue()['gestorUsername']).toBe('gestor.previo');
+  });
+
+  it('avisa al pulsar Cancelar', () => {
+    let cancelled = 0;
+    fixture.componentInstance.cancelled.subscribe(() => cancelled++);
+
+    const cancel = Array.from(element.querySelectorAll('button')).find((b) => b.textContent?.includes('Cancelar'));
+    cancel!.click();
+
+    expect(cancelled).toBe(1);
   });
 });

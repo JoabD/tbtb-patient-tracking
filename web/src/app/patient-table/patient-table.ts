@@ -29,7 +29,10 @@ export class PatientTable implements OnInit {
   /** Petición de lista en curso. Se cancela al pedir otra o al destruir el componente. */
   private request?: Subscription;
 
+  /** El gestor quiere registrar un contacto para este paciente. */
   readonly contactRequested = output<PatientListItem>();
+  /** El gestor quiere ver todos los contactos de este paciente. */
+  readonly contactsRequested = output<PatientListItem>();
 
   protected readonly pageSize = 25;
   protected readonly page = signal(1);

@@ -4,6 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { Subject, of, throwError } from 'rxjs';
 
 import { ContactResponse, PatientListItem } from '../models/api.models';
+import { GestorContext } from '../services/gestor-context';
 import { PatientApiService } from '../services/patient-api.service';
 import { ContactForm } from './contact-form';
 
@@ -122,6 +123,16 @@ describe('ContactForm', () => {
     expect(request.contactDate).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     expect(request.observations).toBeNull();
     expect(emitted).toEqual([created]);
-    expect(element.querySelector('.banner-success')).not.toBeNull();
+    expect(TestBed.inject(GestorContext).username()).toBe('gestor.demo');
+  });
+
+  it('avisa al pulsar Cancelar', () => {
+    let cancelled = 0;
+    fixture.componentInstance.cancelled.subscribe(() => cancelled++);
+
+    const cancel = Array.from(element.querySelectorAll('button')).find((b) => b.textContent?.includes('Cancelar'));
+    cancel!.click();
+
+    expect(cancelled).toBe(1);
   });
 });

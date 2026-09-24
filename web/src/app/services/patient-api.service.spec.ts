@@ -37,6 +37,14 @@ describe('PatientApiService', () => {
     req.flush({});
   });
 
+  it('lista los contactos de un paciente con GET /api/patients/{id}/contacts', () => {
+    service.listContacts('abc-123').subscribe();
+
+    const req = http.expectOne('/api/patients/abc-123/contacts');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
   it('registra un contacto con POST /api/patients/{id}/contacts', () => {
     const body = { channel: 'Call' } as RegisterContactRequest;
     service.registerContact('abc-123', body).subscribe();

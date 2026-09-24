@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { COUNTRIES, DOCUMENT_TYPES, PatientResponse, RegisterPatientRequest } from '../models/api.models';
+import { GestorContext } from '../services/gestor-context';
 import { PatientApiService } from '../services/patient-api.service';
 import { applyApiError, toApiError } from '../shared/api-error';
 import { FieldError } from '../shared/field-error';
@@ -17,8 +18,10 @@ export class PatientForm {
   private readonly api = inject(PatientApiService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly gestor = inject(GestorContext);
 
   readonly registered = output<PatientResponse>();
+  readonly cancelled = output<void>();
 
   protected readonly documentTypes = DOCUMENT_TYPES;
   protected readonly countries = COUNTRIES;
@@ -33,15 +36,13 @@ export class PatientForm {
     email: [''],
     treatmentStartDate: ['', Validators.required],
     privacyAccepted: [false, Validators.requiredTrue],
-    gestorUsername: ['', Validators.required],
+    gestorUsername: [this.gestor.username(), Validators.required],
   });
 
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly successMessage = signal<string | null>(null);
 
   protected submit(): void {
-    this.successMessage.set(null);
     this.errorMessage.set(null);
 
     if (this.form.invalid) {
@@ -57,9 +58,7 @@ export class PatientForm {
     this.api.registerPatient(request).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (patient) => {
         this.submitting.set(false);
-        this.successMessage.set(`Paciente ${patient.fullName} registrado correctamente.`);
-        // El gestor suele registrar varios pacientes seguidos, así que su usuario se conserva.
-        this.form.reset({ gestorUsername: value.gestorUsername });
+        this.gestor.username.set(value.gestorUsername.trim());
         this.registered.emit(patient);
       },
       error: (error: unknown) => {

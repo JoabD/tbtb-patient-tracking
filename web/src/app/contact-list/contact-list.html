@@ -1,0 +1,36 @@
+<p class="context">
+  Paciente: <strong>{{ patient().fullName }}</strong> ({{ patient().documentNumber }})
+</p>
+
+@if (errorMessage(); as message) {
+  <div class="banner banner-error" role="alert">{{ message }}</div>
+} @else if (loading()) {
+  <p class="muted">Cargando…</p>
+} @else if (contacts().length === 0) {
+  <p class="muted">Este paciente todavía no tiene contactos.</p>
+} @else {
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Canal</th>
+          <th>Resultado</th>
+          <th>Gestor</th>
+          <th>Observaciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (contact of contacts(); track contact.id) {
+          <tr>
+            <td>{{ contact.contactDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ channelLabel(contact.channel) }}</td>
+            <td>{{ resultLabel(contact.resultCode) }}</td>
+            <td>{{ contact.gestorUsername }}</td>
+            <td>{{ contact.observations ?? '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

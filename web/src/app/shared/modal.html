@@ -1,0 +1,11 @@
+<dialog #dialog class="modal" [class.modal-wide]="wide()" (close)="closed.emit()" (click)="onDialogClick($event)">
+  <div class="modal-box">
+    <header class="modal-header">
+      <h2>{{ title() }}</h2>
+      <button type="button" class="modal-close" aria-label="Cerrar" (click)="close()">×</button>
+    </header>
+    <div class="modal-body">
+      <ng-content />
+    </div>
+  </div>
+</dialog>

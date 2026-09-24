@@ -1,31 +1,48 @@
 <header class="app-header">
-  <h1>Seguimiento de pacientes</h1>
-  <p>Registro de pacientes y de sus contactos por parte del gestor.</p>
+  <div>
+    <h1>Seguimiento de pacientes</h1>
+    <p>Registro de pacientes y de sus contactos por parte del gestor.</p>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="notice.set(null); newPatientOpen.set(true)">
+    + Nuevo paciente
+  </button>
 </header>
 
 <main>
-  <div class="grid">
-    <section class="panel">
-      <h2>Registrar paciente</h2>
-      <app-patient-form (registered)="onPatientRegistered()" />
-    </section>
-
-    <section class="panel">
-      <h2>Registrar contacto</h2>
-      @if (selectedPatient(); as patient) {
-        <app-contact-form
-          [patient]="patient"
-          (registered)="onContactRegistered()"
-          (cancelled)="selectedPatient.set(null)"
-        />
-      } @else {
-        <p class="muted">Elija un paciente en la tabla y pulse «Registrar contacto».</p>
-      }
-    </section>
-  </div>
+  @if (notice(); as message) {
+    <div class="banner banner-success notice" role="status">
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-small" (click)="notice.set(null)">Cerrar</button>
+    </div>
+  }
 
   <section class="panel">
     <h2>Pacientes</h2>
-    <app-patient-table (contactRequested)="selectedPatient.set($event)" />
+    <app-patient-table
+      (contactRequested)="notice.set(null); contactFormPatient.set($event)"
+      (contactsRequested)="contactListPatient.set($event)"
+    />
   </section>
 </main>
+
+@if (newPatientOpen()) {
+  <app-modal title="Nuevo paciente" (closed)="newPatientOpen.set(false)">
+    <app-patient-form (registered)="onPatientRegistered($event)" (cancelled)="newPatientOpen.set(false)" />
+  </app-modal>
+}
+
+@if (contactFormPatient(); as patient) {
+  <app-modal title="Registrar contacto" (closed)="contactFormPatient.set(null)">
+    <app-contact-form
+      [patient]="patient"
+      (registered)="onContactRegistered(patient)"
+      (cancelled)="contactFormPatient.set(null)"
+    />
+  </app-modal>
+}
+
+@if (contactListPatient(); as patient) {
+  <app-modal title="Contactos del paciente" [wide]="true" (closed)="contactListPatient.set(null)">
+    <app-contact-list [patient]="patient" />
+  </app-modal>
+}

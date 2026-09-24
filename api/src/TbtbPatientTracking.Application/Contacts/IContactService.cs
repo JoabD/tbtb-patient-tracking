@@ -9,4 +9,12 @@ public interface IContactService
         Guid patientId,
         RegisterContactRequest request,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Contactos vigentes (no anulados) de un paciente, del más reciente al más antiguo.
+    /// Alimenta la lista de contactos de la interfaz.
+    /// </summary>
+    Task<ServiceResult<IReadOnlyList<ContactResponse>>> ListByPatientAsync(
+        Guid patientId,
+        CancellationToken cancellationToken = default);
 }

@@ -15,9 +15,8 @@
         <th>Teléfono</th>
         <th>Seguimiento</th>
         <th>Estado</th>
-        <th class="num">Contactos</th>
         <th>Último contacto</th>
-        <th></th>
+        <th>Contactos</th>
       </tr>
     </thead>
     <tbody>
@@ -31,7 +30,6 @@
           <td>
             <span class="tag" [class.tag-off]="!patient.isActive">{{ patient.isActive ? 'Activo' : 'Inactivo' }}</span>
           </td>
-          <td class="num">{{ patient.contactCount }}</td>
           <td>
             @if (patient.lastContact; as last) {
               {{ last.contactDate | date: 'dd/MM/yyyy HH:mm' }}<br />
@@ -40,7 +38,7 @@
               <span class="muted">Sin contactos</span>
             }
           </td>
-          <td>
+          <td class="row-actions">
             <button
               type="button"
               class="btn btn-small"
@@ -50,12 +48,20 @@
             >
               Registrar contacto
             </button>
+            <button
+              type="button"
+              class="btn btn-small"
+              [disabled]="patient.contactCount === 0"
+              (click)="contactsRequested.emit(patient)"
+            >
+              Ver contactos ({{ patient.contactCount }})
+            </button>
           </td>
         </tr>
       } @empty {
         <tr>
-          <td colspan="9" class="muted">
-            {{ loading() ? 'Cargando…' : 'Todavía no hay pacientes registrados.' }}
+          <td colspan="8" class="muted">
+            {{ loading() ? 'Cargando…' : 'Todavía no hay pacientes registrados. Use «Nuevo paciente» para agregar el primero.' }}
           </td>
         </tr>
       }

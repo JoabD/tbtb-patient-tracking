@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -9,6 +9,7 @@ import {
   RESULTS,
   RegisterContactRequest,
 } from '../models/api.models';
+import { GestorContext } from '../services/gestor-context';
 import { PatientApiService } from '../services/patient-api.service';
 import { applyApiError, toApiError } from '../shared/api-error';
 import { FieldError } from '../shared/field-error';
@@ -30,6 +31,7 @@ export class ContactForm {
   private readonly api = inject(PatientApiService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly gestor = inject(GestorContext);
 
   readonly patient = input.required<PatientListItem>();
   readonly registered = output<ContactResponse>();
@@ -40,7 +42,7 @@ export class ContactForm {
   protected readonly maxDate = nowForInput();
 
   protected readonly form = this.fb.group({
-    gestorUsername: ['', Validators.required],
+    gestorUsername: [this.gestor.username(), Validators.required],
     contactDate: [nowForInput(), Validators.required],
     channel: ['', Validators.required],
     resultCode: ['', Validators.required],
@@ -49,21 +51,8 @@ export class ContactForm {
 
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly successMessage = signal<string | null>(null);
-
-  constructor() {
-    // Al elegir otro paciente se limpian los mensajes del anterior.
-    effect(() => {
-      this.patient();
-      untracked(() => {
-        this.errorMessage.set(null);
-        this.successMessage.set(null);
-      });
-    });
-  }
 
   protected submit(): void {
-    this.successMessage.set(null);
     this.errorMessage.set(null);
 
     if (this.form.invalid) {
@@ -89,8 +78,7 @@ export class ContactForm {
       .subscribe({
         next: (contact) => {
           this.submitting.set(false);
-          this.successMessage.set('Contacto registrado correctamente.');
-          this.form.reset({ gestorUsername: value.gestorUsername, contactDate: nowForInput() });
+          this.gestor.username.set(value.gestorUsername.trim());
           this.registered.emit(contact);
         },
         error: (error: unknown) => {

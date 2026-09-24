@@ -32,4 +32,9 @@ export class PatientApiService {
   registerContact(patientId: string, request: RegisterContactRequest): Observable<ContactResponse> {
     return this.http.post<ContactResponse>(`${this.patientsUrl}/${patientId}/contacts`, request);
   }
+
+  /** Contactos vigentes de un paciente, del más reciente al más antiguo. */
+  listContacts(patientId: string): Observable<ContactResponse[]> {
+    return this.http.get<ContactResponse[]>(`${this.patientsUrl}/${patientId}/contacts`);
+  }
 }

@@ -2,13 +2,10 @@
   @if (errorMessage(); as message) {
     <div class="banner banner-error" role="alert">{{ message }}</div>
   }
-  @if (successMessage(); as message) {
-    <div class="banner banner-success" role="status">{{ message }}</div>
-  }
 
   <div class="field">
     <label for="patient-fullName">Nombre completo</label>
-    <input id="patient-fullName" type="text" formControlName="fullName" />
+    <input id="patient-fullName" type="text" formControlName="fullName" autofocus />
     <app-field-error [control]="form.controls.fullName" />
   </div>
 
@@ -89,7 +86,10 @@
     />
   </div>
 
-  <button type="submit" class="btn btn-primary" [disabled]="submitting()">
-    {{ submitting() ? 'Registrando…' : 'Registrar paciente' }}
-  </button>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+      {{ submitting() ? 'Registrando…' : 'Registrar paciente' }}
+    </button>
+    <button type="button" class="btn" (click)="cancelled.emit()">Cancelar</button>
+  </div>
 </form>

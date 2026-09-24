@@ -30,6 +30,10 @@ function page(items: PatientListItem[], totalCount = items.length): PagedRespons
   return { items, page: 1, pageSize: 25, totalCount };
 }
 
+function buttonWithText(root: Element, text: string): HTMLButtonElement {
+  return Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.includes(text)) as HTMLButtonElement;
+}
+
 describe('PatientTable', () => {
   let api: jasmine.SpyObj<PatientApiService>;
   let fixture: ComponentFixture<PatientTable>;
@@ -49,7 +53,7 @@ describe('PatientTable', () => {
     api = jasmine.createSpyObj<PatientApiService>('PatientApiService', ['listPatients']);
   });
 
-  it('muestra el total de contactos y el último contacto de cada paciente', async () => {
+  it('muestra solo el último contacto de cada paciente y el total dentro del botón', async () => {
     api.listPatients.and.returnValue(
       of(
         page([
@@ -73,7 +77,7 @@ describe('PatientTable', () => {
     expect(rows.length).toBe(2);
     expect(rows[0].textContent).toContain('Cédula 1032456789');
     expect(rows[0].textContent).toContain('WhatsApp · No contesta · gestor.demo');
-    expect(rows[0].querySelector('.num')?.textContent).toContain('3');
+    expect(rows[0].textContent).toContain('Ver contactos (3)');
     expect(rows[1].textContent).toContain('Sin contactos');
   });
 
@@ -86,7 +90,7 @@ describe('PatientTable', () => {
     expect(element.textContent).toContain('Todavía no hay pacientes registrados.');
   });
 
-  it('deshabilita el botón de contacto en un paciente inactivo y emite el paciente en uno activo', async () => {
+  it('deshabilita registrar contacto en un paciente inactivo y lo emite en uno activo', async () => {
     const active = patient({ id: 'active' });
     const inactive = patient({ id: 'inactive', fullName: 'Marta Vera', isActive: false });
     api.listPatients.and.returnValue(of(page([active, inactive])));
@@ -94,11 +98,26 @@ describe('PatientTable', () => {
     const emitted: PatientListItem[] = [];
     fixture.componentInstance.contactRequested.subscribe((p) => emitted.push(p));
 
-    const buttons = element.querySelectorAll<HTMLButtonElement>('tbody button');
-    expect(buttons[1].disabled).toBeTrue();
-    buttons[0].click();
+    const rows = element.querySelectorAll('tbody tr');
+    expect(buttonWithText(rows[1], 'Registrar contacto').disabled).toBeTrue();
+    buttonWithText(rows[0], 'Registrar contacto').click();
 
     expect(emitted).toEqual([active]);
+  });
+
+  it('deshabilita ver contactos si el paciente no tiene y lo emite si tiene', async () => {
+    const withContacts = patient({ id: 'with', contactCount: 2 });
+    const without = patient({ id: 'without', contactCount: 0 });
+    api.listPatients.and.returnValue(of(page([withContacts, without])));
+    await create();
+    const emitted: PatientListItem[] = [];
+    fixture.componentInstance.contactsRequested.subscribe((p) => emitted.push(p));
+
+    const rows = element.querySelectorAll('tbody tr');
+    expect(buttonWithText(rows[1], 'Ver contactos').disabled).toBeTrue();
+    buttonWithText(rows[0], 'Ver contactos').click();
+
+    expect(emitted).toEqual([withContacts]);
   });
 
   it('muestra un aviso general si el API no responde', async () => {

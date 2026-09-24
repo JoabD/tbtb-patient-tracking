@@ -21,7 +21,7 @@ body {
   line-height: 1.4;
 }
 
-.app-header { padding: 1.25rem 1.5rem 0; }
+.app-header { padding: 1.25rem 1.5rem 0; display: flex; gap: 1rem; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
 .app-header h1 { margin: 0 0 .25rem; font-size: 1.5rem; }
 .app-header p { margin: 0; color: var(--muted); }
 
@@ -63,3 +63,18 @@ th { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-sp
 .tag { background: var(--ok-bg); color: var(--ok); border-radius: 999px; padding: .1rem .5rem; font-size: .8rem; }
 .tag-off { background: #eceff1; color: var(--muted); }
 .pager { display: flex; gap: .75rem; align-items: center; justify-content: flex-end; margin-top: .75rem; font-size: .9rem; }
+
+.notice { display: flex; justify-content: space-between; align-items: center; gap: .75rem; margin-bottom: 0; }
+.row-actions { white-space: nowrap; }
+.row-actions .btn { margin-right: .35rem; }
+
+/* Ventana modal (elemento nativo <dialog>) */
+.modal { border: 0; border-radius: 10px; padding: 0; width: min(560px, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); color: var(--text); box-shadow: 0 12px 40px rgba(0, 0, 0, .25); }
+.modal-wide { width: min(880px, calc(100vw - 2rem)); }
+.modal::backdrop { background: rgba(31, 41, 51, .5); }
+.modal-box { display: flex; flex-direction: column; max-height: calc(100vh - 2rem); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: .9rem 1.25rem; border-bottom: 1px solid var(--border); }
+.modal-header h2 { margin: 0; font-size: 1.1rem; }
+.modal-close { font: inherit; font-size: 1.5rem; line-height: 1; border: 0; background: none; cursor: pointer; color: var(--muted); padding: 0 .25rem; }
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 1rem 1.25rem 1.25rem; overflow-y: auto; }

@@ -72,4 +72,31 @@ public class ContactService(
 
         return ServiceResult<ContactResponse>.Ok(ContactResponse.FromEntity(contact));
     }
+
+    public async Task<ServiceResult<IReadOnlyList<ContactResponse>>> ListByPatientAsync(
+        Guid patientId,
+        CancellationToken cancellationToken = default)
+    {
+        if (!await db.Patients.AnyAsync(p => p.Id == patientId, cancellationToken))
+        {
+            return ServiceResult<IReadOnlyList<ContactResponse>>.NotFound("El paciente indicado no existe.");
+        }
+
+        // Solo contactos vigentes: los anulados (IsDeleted) no cuentan. La búsqueda por PatientId aprovecha
+        // el índice IX_Contacts_PatientId_ContactDate.
+        var contacts = await db.Contacts
+            .AsNoTracking()
+            .Where(c => c.PatientId == patientId && !c.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        // Se ordena en memoria: los contactos de un solo paciente son pocos, y así el orden no depende del
+        // proveedor de base de datos (SQLite no puede ordenar por DateTimeOffset) y se puede probar.
+        var items = contacts
+            .OrderByDescending(c => c.ContactDate)
+            .ThenByDescending(c => c.CreatedAt)
+            .Select(ContactResponse.FromEntity)
+            .ToList();
+
+        return ServiceResult<IReadOnlyList<ContactResponse>>.Ok(items);
+    }
 }

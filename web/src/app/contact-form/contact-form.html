@@ -6,14 +6,11 @@
   @if (errorMessage(); as message) {
     <div class="banner banner-error" role="alert">{{ message }}</div>
   }
-  @if (successMessage(); as message) {
-    <div class="banner banner-success" role="status">{{ message }}</div>
-  }
 
   <div class="row">
     <div class="field">
       <label for="contact-gestorUsername">Usuario del gestor</label>
-      <input id="contact-gestorUsername" type="text" formControlName="gestorUsername" />
+      <input id="contact-gestorUsername" type="text" formControlName="gestorUsername" autofocus />
       <app-field-error [control]="form.controls.gestorUsername" />
     </div>
 
@@ -58,6 +55,6 @@
     <button type="submit" class="btn btn-primary" [disabled]="submitting()">
       {{ submitting() ? 'Registrando…' : 'Registrar contacto' }}
     </button>
-    <button type="button" class="btn" (click)="cancelled.emit()">Cerrar</button>
+    <button type="button" class="btn" (click)="cancelled.emit()">Cancelar</button>
   </div>
 </form>
