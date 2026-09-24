@@ -11,7 +11,7 @@
 | Criterio | Commit o archivos | Prueba que lo verifica | Estado |
 | :-- | :-- | :-- | :-- |
 | CA-1: registro de paciente | `api/src/TbtbPatientTracking.Application/Patients/*` (servicio y validaciones), `api/src/TbtbPatientTracking.Domain/Entities/Patient.cs` (`Patient.Create`), `api/src/TbtbPatientTracking.Api/Controllers/PatientsController.cs` | `api/tests/TbtbPatientTracking.Tests/Patients/PatientServiceTests.cs` (pruebas con prefijo `CA1_`) | Parcial (servicio y API cubiertos; falta la interfaz, Fase 5) |
-| CA-2: registro de contacto | Pendiente | Pendiente | Fuera de alcance por ahora (se construye en la Fase 3) |
+| CA-2: registro de contacto | `api/src/TbtbPatientTracking.Application/Contacts/*` (servicio y validaciones), `api/src/TbtbPatientTracking.Domain/Entities/Contact.cs` (`Contact.Create`), `api/src/TbtbPatientTracking.Api/Controllers/ContactsController.cs` | `api/tests/TbtbPatientTracking.Tests/Contacts/ContactServiceTests.cs` (pruebas con prefijo `CA2_`) | Parcial (servicio y API cubiertos; falta la interfaz, Fase 5) |
 | CA-3: corrección de contacto | No implementado | No aplica | Fuera de alcance |
 | CA-4: filtros del mes | No implementado | No aplica | Fuera de alcance |
 | CA-5: paciente ilocalizable | No implementado | No aplica | Fuera de alcance |
@@ -47,6 +47,10 @@ Formato: fecha · decisión · motivo · propuesta de (yo / asistente).
 - 2026-09-23 · **Corrección mía sobre la propuesta del asistente (`PatientService`):** el asistente propuso crear el paciente con `new Patient { ... }`, sin logging y volver a consultar la base dentro del `catch` de la condición de carrera. Lo corregí: (1) inyectar `ILogger` para dejar traza de duplicados y carreras, (2) crear el paciente con un método de fábrica `Patient.Create(...)` para que nazca en estado válido (evitar un modelo anémico), (3) no hacer una segunda consulta en el `catch`, y (4) validar que el parseo de catálogos no falle · Observabilidad en un sistema de salud, integridad de la entidad y un viaje menos a la base · yo corregí, asistente propuso.
 - 2026-09-23 · **Ajuste del asistente a mi corrección:** mi versión atrapaba cualquier `DbUpdateException` como duplicado, lo que disfrazaría otros fallos de base de datos (llave foránea, texto demasiado largo, conexión) como un 409. Se traduce solo la violación de índice único (errores 2601 y 2627 de SQL Server) en `AppDbContext`, y el servicio captura esa excepción específica. Mi llamada a `Patient.Create` también estaba incompleta y se completó con todos los campos · Corrección de un defecto en mi propio código · asistente propuso, yo aprobé.
 - 2026-09-23 · **Riesgo aceptado por tiempo:** los logs registran el número de documento del paciente (`{DocumentNumber}`). El asistente advirtió que es un dato personal y que los logs suelen circular y retenerse más que la base de datos; se deja así por tiempo. Mejora futura: registrar solo país y tipo de documento, o el número enmascarado · yo decidí, asistente advirtió.
+- 2026-09-23 · Se permite registrar contactos con pacientes inactivos (`IsActive = false`) · Registrar el contacto puede ser precisamente el mecanismo para intentar llamar de nuevo al paciente: reactivarlo, ofrecerle un nuevo servicio o contrato, o verificar su situación. Rechazarlo cerraría esa vía · el asistente propuso permitirlo y rechazarlo como alternativa; yo confirmé permitirlo con estas razones.
+- 2026-09-23 · Registrar un contacto "No contesta" no modifica `TrackingStatus` · La marca de ilocalizable es el CA-5 y está fuera de alcance; una prueba lo documenta · asistente propuso, yo aprobé.
+- 2026-09-23 · Contacto con fecha futura se rechaza; la fecha igual a la hora del servidor se acepta. La validación del cuerpo va antes de comprobar que el paciente exista (400 antes que 404) · Evita una consulta a la base si la solicitud ya es inválida · asistente propuso, yo aprobé.
+- 2026-09-23 · `Contact.Create` con setters privados, como `Patient.Create` · Consistencia con la corrección que hice en la Fase 2 (evitar modelo anémico) · yo, aplicado por el asistente.
 
 ## 4. Bitácora por commit
 
@@ -81,7 +85,7 @@ Formato: fecha · decisión · motivo · propuesta de (yo / asistente).
 - Rechazos o correcciones: rechacé `nvarchar` y mantuve `varchar` (ver registro de decisiones). Los valores de los catálogos pasaron de español a inglés por decisión mía sobre el alcance. Se corrigió un error del script de datos (`QUOTED_IDENTIFIER`).
 
 ### Commit 4: Fase 2: CA-1 registro de paciente (servicio, validaciones, endpoint y pruebas)
-- Hash: (se completa al inicio de la siguiente fase)
+- Hash: `3c36e45`
 - Fase: 2
 - Qué cambió y por qué: `POST /api/patients` (CA-1). Servicio de aplicación con validaciones en español por campo, detección de documento duplicado (`409`), control de la condición de carrera traduciendo la violación del índice único en `AppDbContext`, y creación del paciente por el método de fábrica `Patient.Create`. Controlador delgado que traduce el resultado a HTTP (`201`, `400`, `409`) con `ProblemDetails`. `IAppDbContext` permite usar el `DbContext` directo desde `Application`. Se quitó `HasColumnType("date")` de `TreatmentStartDate` (SQL Server ya usa `date` por defecto para `DateOnly`); no requiere migración.
 - Archivos principales: `api/src/TbtbPatientTracking.Application/Patients/*`, `api/src/TbtbPatientTracking.Application/Common/*`, `api/src/TbtbPatientTracking.Application/Abstractions/IAppDbContext.cs`, `api/src/TbtbPatientTracking.Domain/Entities/Patient.cs`, `api/src/TbtbPatientTracking.Infrastructure/Persistence/AppDbContext.cs`, `api/src/TbtbPatientTracking.Api/Controllers/PatientsController.cs`, `api/tests/TbtbPatientTracking.Tests/*`
@@ -89,3 +93,13 @@ Formato: fecha · decisión · motivo · propuesta de (yo / asistente).
 - Prueba que lo verifica: `PatientServiceTests` (17 pruebas, 34 casos, todas con prefijo `CA1_`). Resultado: 34 superadas, 0 fallidas. `dotnet ef migrations has-pending-model-changes`: sin cambios pendientes.
 - Propuesta de: asistente, con correcciones mías sobre el servicio y el dominio
 - Rechazos o correcciones: corregí el `PatientService` propuesto (sin logging, `new Patient {...}`, segunda consulta en el `catch`, parseo sin control). Ver registro de decisiones.
+
+### Commit 5: Fase 3: CA-2 registro de contacto (servicio, validaciones, endpoint y pruebas)
+- Hash: (se completa al inicio de la siguiente fase)
+- Fase: 3
+- Qué cambió y por qué: `POST /api/patients/{patientId}/contacts` (CA-2). Servicio con validaciones en español por campo (gestor, fecha no futura, canal y resultado de catálogo cerrado, observaciones), `404` si el paciente no existe, contacto creado con `Contact.Create` y controlador delgado con `ProblemDetails`. Los logs registran solo identificadores.
+- Archivos principales: `api/src/TbtbPatientTracking.Application/Contacts/*`, `api/src/TbtbPatientTracking.Domain/Entities/Contact.cs`, `api/src/TbtbPatientTracking.Api/Controllers/ContactsController.cs`, `api/tests/TbtbPatientTracking.Tests/Contacts/ContactServiceTests.cs`
+- Criterio relacionado: CA-2
+- Prueba que lo verifica: `ContactServiceTests` (pruebas con prefijo `CA2_`). Resultado: pendiente de ejecutar.
+- Propuesta de: asistente
+- Rechazos o correcciones: ninguno en esta fase.
