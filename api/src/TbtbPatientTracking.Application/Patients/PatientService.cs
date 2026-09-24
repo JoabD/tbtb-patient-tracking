@@ -101,9 +101,7 @@ public class PatientService(
             return ServiceResult<PagedResponse<PatientListItemResponse>>.Invalid(errors);
         }
 
-        var totalCount = await db.Patients.CountAsync(cancellationToken);
-
-        // Consulta combinada de Patients y Contacts (Anexo A). Primero se pagina Patients y, solo para las filas
+        // 1. Consulta combinada de Patients y Contacts (Anexo A). Primero se pagina Patients y, solo para las filas
         // de esa página, se calculan dos subconsultas correlacionadas por PatientId: el total de contactos vigentes
         // y el último contacto. Ambas se apoyan en IX_Contacts_PatientId_ContactDate (filtrado por IsDeleted = 0).
         // Los contactos anulados se excluyen. El detalle de la justificación está en la bitácora.
@@ -134,6 +132,18 @@ public class PatientService(
                     .Select(c => new LastContactRow(c.ContactDate, c.Channel, c.ResultCode, c.GestorUsername))
                     .FirstOrDefault()))
             .ToListAsync(cancellationToken);
+
+        // 2. El total se calcula después de traer la página, y solo si hace falta: si la primera página no se llenó,
+        // el total es lo que llegó y se ahorra un COUNT a la tabla. En cualquier otro caso sí se cuenta.
+        int totalCount;
+        if (page == 1 && rows.Count < pageSize)
+        {
+            totalCount = rows.Count;
+        }
+        else
+        {
+            totalCount = await db.Patients.CountAsync(cancellationToken);
+        }
 
         // Los enums se pasan a texto en memoria, no en SQL, para no depender de cómo los traduzca el proveedor.
         var items = rows
