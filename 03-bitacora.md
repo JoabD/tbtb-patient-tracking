@@ -10,7 +10,7 @@
 
 | Criterio | Commit o archivos | Prueba que lo verifica | Estado |
 | :-- | :-- | :-- | :-- |
-| CA-1: registro de paciente | Pendiente | Pendiente | Fuera de alcance por ahora (se construye en la Fase 2) |
+| CA-1: registro de paciente | `api/src/TbtbPatientTracking.Application/Patients/*` (servicio y validaciones), `api/src/TbtbPatientTracking.Domain/Entities/Patient.cs` (`Patient.Create`), `api/src/TbtbPatientTracking.Api/Controllers/PatientsController.cs` | `api/tests/TbtbPatientTracking.Tests/Patients/PatientServiceTests.cs` (pruebas con prefijo `CA1_`) | Parcial (servicio y API cubiertos; falta la interfaz, Fase 5) |
 | CA-2: registro de contacto | Pendiente | Pendiente | Fuera de alcance por ahora (se construye en la Fase 3) |
 | CA-3: corrección de contacto | No implementado | No aplica | Fuera de alcance |
 | CA-4: filtros del mes | No implementado | No aplica | Fuera de alcance |
@@ -38,6 +38,15 @@ Formato: fecha · decisión · motivo · propuesta de (yo / asistente).
 - 2026-09-23 · La solución de .NET vive en `api/` (con `src/` y `tests/`), el proyecto Angular irá en `web/`, y `scripts/` queda en la raíz · Estructura más limpia y coincide con la que pide la prueba · yo.
 - 2026-09-23 · Herramienta `dotnet-ef` fijada en 8.0.31 (había una 9.0.2 instalada) · Alinea las herramientas con EF Core 8 y evita diferencias en la migración y el script · asistente propuso, yo ejecuté.
 - 2026-09-23 · `scripts/002_datos_prueba.sql` incluye `SET QUOTED_IDENTIFIER ON` · Al probarlo con `sqlcmd` falló el insert en `Contacts`: SQL Server exige esa opción para tablas con índice filtrado y `sqlcmd` la trae apagada. Lo detecté al ejecutar el script sobre la base real · error del asistente, encontrado en la verificación.
+- 2026-09-23 · `IAppDbContext` en `Application`: los servicios usan el `DbContext` directo a través de una interfaz pequeña, sin repositorios · Menos código y menos mantenimiento; la interfaz evita que `Application` dependa de `Infrastructure` (inversión de dependencias) · asistente propuso, yo aprobé (coincide con lo que yo iba a sugerir).
+- 2026-09-23 · Pruebas del servicio con SQLite en memoria y no con la base en memoria de EF · SQLite respeta el índice único, necesario para probar los duplicados · asistente propuso, yo aprobé.
+- 2026-09-23 · `GestorUsername` se agrega al DTO de registro de paciente (alimenta `CreatedBy`) · No hay autenticación; misma decisión que para los contactos · asistente propuso, yo aprobé.
+- 2026-09-23 · El consentimiento llega como booleano `PrivacyAccepted` y la fecha de aceptación la fija el servidor en UTC · Es lo más simple y evita que el cliente falsifique la fecha · yo.
+- 2026-09-23 · Las propiedades de texto del DTO son `string?` · Si fueran no nulas, ASP.NET rechazaría el campo faltante con su propio mensaje en inglés antes de llegar a mi validación en español · asistente propuso, yo aprobé.
+- 2026-09-23 · `CatalogParser` compara solo por nombre exacto y no usa `Enum.TryParse` · `Enum.TryParse` acepta números ("1") y listas ("Cedula,Dni") y las convertiría en otro valor sin avisar · asistente propuso, yo aprobé.
+- 2026-09-23 · **Corrección mía sobre la propuesta del asistente (`PatientService`):** el asistente propuso crear el paciente con `new Patient { ... }`, sin logging y volver a consultar la base dentro del `catch` de la condición de carrera. Lo corregí: (1) inyectar `ILogger` para dejar traza de duplicados y carreras, (2) crear el paciente con un método de fábrica `Patient.Create(...)` para que nazca en estado válido (evitar un modelo anémico), (3) no hacer una segunda consulta en el `catch`, y (4) validar que el parseo de catálogos no falle · Observabilidad en un sistema de salud, integridad de la entidad y un viaje menos a la base · yo corregí, asistente propuso.
+- 2026-09-23 · **Ajuste del asistente a mi corrección:** mi versión atrapaba cualquier `DbUpdateException` como duplicado, lo que disfrazaría otros fallos de base de datos (llave foránea, texto demasiado largo, conexión) como un 409. Se traduce solo la violación de índice único (errores 2601 y 2627 de SQL Server) en `AppDbContext`, y el servicio captura esa excepción específica. Mi llamada a `Patient.Create` también estaba incompleta y se completó con todos los campos · Corrección de un defecto en mi propio código · asistente propuso, yo aprobé.
+- 2026-09-23 · **Riesgo aceptado por tiempo:** los logs registran el número de documento del paciente (`{DocumentNumber}`). El asistente advirtió que es un dato personal y que los logs suelen circular y retenerse más que la base de datos; se deja así por tiempo. Mejora futura: registrar solo país y tipo de documento, o el número enmascarado · yo decidí, asistente advirtió.
 
 ## 4. Bitácora por commit
 
@@ -61,8 +70,8 @@ Formato: fecha · decisión · motivo · propuesta de (yo / asistente).
 - Propuesta de: asistente, aprobada por mí (incluido `.gitattributes`)
 - Rechazos o correcciones: ninguno en esta fase.
 
-### Commit 3: (pendiente de mensaje)
-- Hash: (se completa al inicio de la siguiente fase)
+### Commit 3: Fase 1: solucion en capas, modelo de datos EF Core, migracion inicial y scripts SQL
+- Hash: `d7af8e1`
 - Fase: 1
 - Qué cambió y por qué: solución en capas dentro de `api/` (Domain, Application, Infrastructure, Api y Tests), entidades y enums, configuración de EF Core con los índices del plan, migración `InitialCreate`, `Program.cs` que aplica migraciones al arrancar en Development, `appsettings.Example.json`, y los scripts `001_esquema.sql` (generado de la migración) y `002_datos_prueba.sql` (9 pacientes y 22 contactos). Verificado contra SQL Server Express: la base se creó y el script de datos cargó 9 pacientes y 22 contactos.
 - Archivos principales: `api/src/TbtbPatientTracking.Domain/*`, `api/src/TbtbPatientTracking.Infrastructure/Persistence/*`, `api/src/TbtbPatientTracking.Infrastructure/Migrations/*`, `api/src/TbtbPatientTracking.Api/Program.cs`, `scripts/001_esquema.sql`, `scripts/002_datos_prueba.sql`
@@ -70,3 +79,13 @@ Formato: fecha · decisión · motivo · propuesta de (yo / asistente).
 - Prueba que lo verifica: pendiente (las pruebas empiezan en la Fase 2). Verificación manual: conteos en la base.
 - Propuesta de: asistente, con decisiones mías sobre valores, tipos, nombres y estructura de carpetas
 - Rechazos o correcciones: rechacé `nvarchar` y mantuve `varchar` (ver registro de decisiones). Los valores de los catálogos pasaron de español a inglés por decisión mía sobre el alcance. Se corrigió un error del script de datos (`QUOTED_IDENTIFIER`).
+
+### Commit 4: Fase 2: CA-1 registro de paciente (servicio, validaciones, endpoint y pruebas)
+- Hash: (se completa al inicio de la siguiente fase)
+- Fase: 2
+- Qué cambió y por qué: `POST /api/patients` (CA-1). Servicio de aplicación con validaciones en español por campo, detección de documento duplicado (`409`), control de la condición de carrera traduciendo la violación del índice único en `AppDbContext`, y creación del paciente por el método de fábrica `Patient.Create`. Controlador delgado que traduce el resultado a HTTP (`201`, `400`, `409`) con `ProblemDetails`. `IAppDbContext` permite usar el `DbContext` directo desde `Application`. Se quitó `HasColumnType("date")` de `TreatmentStartDate` (SQL Server ya usa `date` por defecto para `DateOnly`); no requiere migración.
+- Archivos principales: `api/src/TbtbPatientTracking.Application/Patients/*`, `api/src/TbtbPatientTracking.Application/Common/*`, `api/src/TbtbPatientTracking.Application/Abstractions/IAppDbContext.cs`, `api/src/TbtbPatientTracking.Domain/Entities/Patient.cs`, `api/src/TbtbPatientTracking.Infrastructure/Persistence/AppDbContext.cs`, `api/src/TbtbPatientTracking.Api/Controllers/PatientsController.cs`, `api/tests/TbtbPatientTracking.Tests/*`
+- Criterio relacionado: CA-1
+- Prueba que lo verifica: `PatientServiceTests` (17 pruebas, 34 casos, todas con prefijo `CA1_`). Resultado: 34 superadas, 0 fallidas. `dotnet ef migrations has-pending-model-changes`: sin cambios pendientes.
+- Propuesta de: asistente, con correcciones mías sobre el servicio y el dominio
+- Rechazos o correcciones: corregí el `PatientService` propuesto (sin logging, `new Patient {...}`, segunda consulta en el `catch`, parseo sin control). Ver registro de decisiones.

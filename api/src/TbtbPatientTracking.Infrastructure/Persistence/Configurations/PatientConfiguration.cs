@@ -28,8 +28,6 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
 
         builder.Property(p => p.Email).HasMaxLength(100).IsUnicode(false);
 
-        builder.Property(p => p.TreatmentStartDate).HasColumnType("date");
-
         builder.Property(p => p.TrackingStatus).HasConversion<string>().HasMaxLength(20).IsUnicode(false).IsRequired();
 
         // ValueGeneratedNever evita que EF omita el valor 'false' y la base aplique el default 'true'.

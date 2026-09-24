@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TbtbPatientTracking.Application;
 using TbtbPatientTracking.Infrastructure;
 using TbtbPatientTracking.Infrastructure.Persistence;
 
@@ -10,6 +11,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException(
         "Falta la cadena de conexión 'DefaultConnection'. Copie appsettings.Example.json a appsettings.Development.json.");
 
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(connectionString);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
