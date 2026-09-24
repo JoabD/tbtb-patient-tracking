@@ -60,7 +60,12 @@ describe('ContactList', () => {
   it('pide los contactos del paciente y los muestra en el orden recibido, con etiquetas en español', async () => {
     api.listContacts.and.returnValue(
       of([
-        contact({ id: 'c2', channel: 'WhatsApp', resultCode: 'NoAnswer', observations: 'No respondió' }),
+        contact({
+          id: 'c2',
+          channel: 'WhatsApp',
+          resultCode: 'NoAnswer',
+          observations: 'No respondió',
+        }),
         contact({ id: 'c1', channel: 'Call', resultCode: 'Contacted' }),
       ]),
     );
@@ -88,12 +93,20 @@ describe('ContactList', () => {
 
   it('muestra un aviso general si el paciente ya no existe (404)', async () => {
     api.listContacts.and.returnValue(
-      throwError(() => new HttpErrorResponse({ status: 404, error: { detail: 'El paciente indicado no existe.' } })),
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 404,
+            error: { detail: 'El paciente indicado no existe.' },
+          }),
+      ),
     );
 
     await create();
 
-    expect(element.querySelector('.banner-error')?.textContent).toContain('El paciente indicado no existe.');
+    expect(element.querySelector('.banner-error')?.textContent).toContain(
+      'El paciente indicado no existe.',
+    );
   });
 
   it('cancela la petición en curso si el componente se destruye', async () => {

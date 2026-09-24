@@ -2,7 +2,12 @@ import { Component, DestroyRef, inject, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { COUNTRIES, DOCUMENT_TYPES, PatientResponse, RegisterPatientRequest } from '../models/api.models';
+import {
+  COUNTRIES,
+  DOCUMENT_TYPES,
+  PatientResponse,
+  RegisterPatientRequest,
+} from '../models/api.models';
 import { GestorContext } from '../services/gestor-context';
 import { PatientApiService } from '../services/patient-api.service';
 import { applyApiError, toApiError } from '../shared/api-error';
@@ -55,16 +60,19 @@ export class PatientForm {
 
     this.submitting.set(true);
     // takeUntilDestroyed cancela la petición si el componente se destruye antes de que responda.
-    this.api.registerPatient(request).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (patient) => {
-        this.submitting.set(false);
-        this.gestor.username.set(value.gestorUsername.trim());
-        this.registered.emit(patient);
-      },
-      error: (error: unknown) => {
-        this.submitting.set(false);
-        this.errorMessage.set(applyApiError(this.form, toApiError(error)));
-      },
-    });
+    this.api
+      .registerPatient(request)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (patient) => {
+          this.submitting.set(false);
+          this.gestor.username.set(value.gestorUsername.trim());
+          this.registered.emit(patient);
+        },
+        error: (error: unknown) => {
+          this.submitting.set(false);
+          this.errorMessage.set(applyApiError(this.form, toApiError(error)));
+        },
+      });
   }
 }

@@ -24,7 +24,8 @@ export function toApiError(error: unknown): ApiError {
     return unexpected();
   }
 
-  const body: ProblemBody = typeof error.error === 'object' && error.error !== null ? error.error : {};
+  const body: ProblemBody =
+    typeof error.error === 'object' && error.error !== null ? error.error : {};
 
   switch (error.status) {
     case 0:

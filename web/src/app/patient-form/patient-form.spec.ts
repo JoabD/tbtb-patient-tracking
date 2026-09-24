@@ -69,13 +69,17 @@ describe('PatientForm', () => {
 
     expect(api.registerPatient).not.toHaveBeenCalled();
     expect(element.querySelectorAll('.field-error').length).toBeGreaterThan(5);
-    expect(element.textContent).toContain('Debe confirmarse la aceptación del aviso de privacidad.');
+    expect(element.textContent).toContain(
+      'Debe confirmarse la aceptación del aviso de privacidad.',
+    );
   });
 
   it('muestra un mensaje claro cuando el API responde 409 por documento duplicado', () => {
     const detail = 'Ya existe un paciente registrado con ese país, tipo y número de documento.';
     api.registerPatient.and.returnValue(
-      throwError(() => new HttpErrorResponse({ status: 409, error: { title: 'Conflicto', detail } })),
+      throwError(
+        () => new HttpErrorResponse({ status: 409, error: { title: 'Conflicto', detail } }),
+      ),
     );
     fillValidForm();
 
@@ -101,7 +105,9 @@ describe('PatientForm', () => {
 
     const phoneField = element.querySelector('#patient-phone')!.closest('.field')!;
     expect(phoneField.textContent).toContain('El teléfono debe tener entre 7 y 15 dígitos.');
-    expect(element.querySelector('.banner-error')?.textContent).toContain('Revise los campos marcados.');
+    expect(element.querySelector('.banner-error')?.textContent).toContain(
+      'Revise los campos marcados.',
+    );
   });
 
   it('avisa que no se pudo conectar cuando hay un error de red', () => {
@@ -110,7 +116,9 @@ describe('PatientForm', () => {
 
     submit();
 
-    expect(element.querySelector('.banner-error')?.textContent).toContain('No se pudo conectar con el servidor');
+    expect(element.querySelector('.banner-error')?.textContent).toContain(
+      'No se pudo conectar con el servidor',
+    );
   });
 
   it('cancela la petición en curso si el componente se destruye', () => {
@@ -153,7 +161,9 @@ describe('PatientForm', () => {
     let cancelled = 0;
     fixture.componentInstance.cancelled.subscribe(() => cancelled++);
 
-    const cancel = Array.from(element.querySelectorAll('button')).find((b) => b.textContent?.includes('Cancelar'));
+    const cancel = Array.from(element.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Cancelar'),
+    );
     cancel!.click();
 
     expect(cancelled).toBe(1);

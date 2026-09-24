@@ -28,12 +28,17 @@
           <td>{{ patient.phone }}</td>
           <td>{{ trackingLabel(patient.trackingStatus) }}</td>
           <td>
-            <span class="tag" [class.tag-off]="!patient.isActive">{{ patient.isActive ? 'Activo' : 'Inactivo' }}</span>
+            <span class="tag" [class.tag-off]="!patient.isActive">{{
+              patient.isActive ? 'Activo' : 'Inactivo'
+            }}</span>
           </td>
           <td>
             @if (patient.lastContact; as last) {
               {{ last.contactDate | date: 'dd/MM/yyyy HH:mm' }}<br />
-              <small>{{ channelLabel(last.channel) }} · {{ resultLabel(last.resultCode) }} · {{ last.gestorUsername }}</small>
+              <small
+                >{{ channelLabel(last.channel) }} · {{ resultLabel(last.resultCode) }} ·
+                {{ last.gestorUsername }}</small
+              >
             } @else {
               <span class="muted">Sin contactos</span>
             }
@@ -43,7 +48,9 @@
               type="button"
               class="btn btn-small"
               [disabled]="!patient.isActive"
-              [attr.title]="patient.isActive ? null : 'Un paciente inactivo no admite nuevos contactos'"
+              [attr.title]="
+                patient.isActive ? null : 'Un paciente inactivo no admite nuevos contactos'
+              "
               (click)="contactRequested.emit(patient)"
             >
               Registrar contacto
@@ -61,7 +68,11 @@
       } @empty {
         <tr>
           <td colspan="8" class="muted">
-            {{ loading() ? 'Cargando…' : 'Todavía no hay pacientes registrados. Use «Nuevo paciente» para agregar el primero.' }}
+            {{
+              loading()
+                ? 'Cargando…'
+                : 'Todavía no hay pacientes registrados. Use «Nuevo paciente» para agregar el primero.'
+            }}
           </td>
         </tr>
       }
@@ -70,7 +81,12 @@
 </div>
 
 <div class="pager">
-  <button type="button" class="btn btn-small" [disabled]="page() <= 1 || loading()" (click)="goTo(page() - 1)">
+  <button
+    type="button"
+    class="btn btn-small"
+    [disabled]="page() <= 1 || loading()"
+    (click)="goTo(page() - 1)"
+  >
     Anterior
   </button>
   <span>Página {{ page() }} de {{ totalPages() }} · {{ data()?.totalCount ?? 0 }} pacientes</span>

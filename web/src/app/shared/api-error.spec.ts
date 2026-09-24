@@ -12,20 +12,30 @@ describe('api-error', () => {
 
     it('lee los errores por campo de un 400', () => {
       const result = toApiError(
-        new HttpErrorResponse({ status: 400, error: { errors: { phone: ['El teléfono es obligatorio.'] } } }),
+        new HttpErrorResponse({
+          status: 400,
+          error: { errors: { phone: ['El teléfono es obligatorio.'] } },
+        }),
       );
       expect(result.kind).toBe('validation');
       expect(result.fieldErrors['phone']).toEqual(['El teléfono es obligatorio.']);
     });
 
     it('usa el detalle del 409 como mensaje', () => {
-      const result = toApiError(new HttpErrorResponse({ status: 409, error: { detail: 'Ya existe.' } }));
+      const result = toApiError(
+        new HttpErrorResponse({ status: 409, error: { detail: 'Ya existe.' } }),
+      );
       expect(result.kind).toBe('conflict');
       expect(result.message).toBe('Ya existe.');
     });
 
     it('usa el detalle del 404 como mensaje', () => {
-      const result = toApiError(new HttpErrorResponse({ status: 404, error: { detail: 'El paciente indicado no existe.' } }));
+      const result = toApiError(
+        new HttpErrorResponse({
+          status: 404,
+          error: { detail: 'El paciente indicado no existe.' },
+        }),
+      );
       expect(result.kind).toBe('notFound');
       expect(result.message).toBe('El paciente indicado no existe.');
     });
@@ -53,7 +63,11 @@ describe('api-error', () => {
 
     it('acepta claves con el prefijo de binding de ASP.NET ("$.treatmentStartDate")', () => {
       const form = new FormGroup({ treatmentStartDate: new FormControl('') });
-      applyApiError(form, { kind: 'validation', message: 'x', fieldErrors: { '$.treatmentStartDate': ['Fecha inválida.'] } });
+      applyApiError(form, {
+        kind: 'validation',
+        message: 'x',
+        fieldErrors: { '$.treatmentStartDate': ['Fecha inválida.'] },
+      });
       expect(form.controls.treatmentStartDate.errors?.['server']).toBe('Fecha inválida.');
     });
 
@@ -69,7 +83,9 @@ describe('api-error', () => {
 
     it('para 409, 404 y red devuelve el mensaje del error', () => {
       const form = new FormGroup({});
-      expect(applyApiError(form, { kind: 'conflict', message: 'Duplicado.', fieldErrors: {} })).toBe('Duplicado.');
+      expect(
+        applyApiError(form, { kind: 'conflict', message: 'Duplicado.', fieldErrors: {} }),
+      ).toBe('Duplicado.');
     });
   });
 });

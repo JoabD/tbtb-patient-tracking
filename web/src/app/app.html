@@ -3,7 +3,11 @@
     <h1>Seguimiento de pacientes</h1>
     <p>Registro de pacientes y de sus contactos por parte del gestor.</p>
   </div>
-  <button type="button" class="btn btn-primary" (click)="notice.set(null); newPatientOpen.set(true)">
+  <button
+    type="button"
+    class="btn btn-primary"
+    (click)="notice.set(null); newPatientOpen.set(true)"
+  >
     + Nuevo paciente
   </button>
 </header>
@@ -27,7 +31,10 @@
 
 @if (newPatientOpen()) {
   <app-modal title="Nuevo paciente" (closed)="newPatientOpen.set(false)">
-    <app-patient-form (registered)="onPatientRegistered($event)" (cancelled)="newPatientOpen.set(false)" />
+    <app-patient-form
+      (registered)="onPatientRegistered($event)"
+      (cancelled)="newPatientOpen.set(false)"
+    />
   </app-modal>
 }
 

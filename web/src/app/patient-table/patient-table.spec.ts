@@ -31,7 +31,9 @@ function page(items: PatientListItem[], totalCount = items.length): PagedRespons
 }
 
 function buttonWithText(root: Element, text: string): HTMLButtonElement {
-  return Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.includes(text)) as HTMLButtonElement;
+  return Array.from(root.querySelectorAll('button')).find((b) =>
+    b.textContent?.includes(text),
+  ) as HTMLButtonElement;
 }
 
 describe('PatientTable', () => {
@@ -125,7 +127,9 @@ describe('PatientTable', () => {
 
     await create();
 
-    expect(element.querySelector('.banner-error')?.textContent).toContain('No se pudo conectar con el servidor');
+    expect(element.querySelector('.banner-error')?.textContent).toContain(
+      'No se pudo conectar con el servidor',
+    );
   });
 
   it('cancela la petición anterior al pedir otra y no deja que una respuesta vieja pise a la nueva', async () => {

@@ -10,13 +10,18 @@
   <div class="row">
     <div class="field">
       <label for="contact-gestorUsername">Usuario del gestor</label>
-      <input id="contact-gestorUsername" type="text" formControlName="gestorUsername" autofocus />
+      <input id="contact-gestorUsername" type="text" formControlName="gestorUsername" />
       <app-field-error [control]="form.controls.gestorUsername" />
     </div>
 
     <div class="field">
       <label for="contact-contactDate">Fecha y hora del contacto</label>
-      <input id="contact-contactDate" type="datetime-local" formControlName="contactDate" [max]="maxDate" />
+      <input
+        id="contact-contactDate"
+        type="datetime-local"
+        formControlName="contactDate"
+        [max]="maxDate"
+      />
       <app-field-error [control]="form.controls.contactDate" />
     </div>
   </div>

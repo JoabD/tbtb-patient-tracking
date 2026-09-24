@@ -48,7 +48,12 @@ describe('ContactForm', () => {
   }
 
   function fillValidForm(): void {
-    form().patchValue({ gestorUsername: 'gestor.demo', channel: 'Call', resultCode: 'NoAnswer', observations: '' });
+    form().patchValue({
+      gestorUsername: 'gestor.demo',
+      channel: 'Call',
+      resultCode: 'NoAnswer',
+      observations: '',
+    });
   }
 
   function submit(): void {
@@ -69,13 +74,21 @@ describe('ContactForm', () => {
 
   it('muestra un aviso general cuando el API responde 404 (el paciente ya no existe)', () => {
     api.registerContact.and.returnValue(
-      throwError(() => new HttpErrorResponse({ status: 404, error: { detail: 'El paciente indicado no existe.' } })),
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 404,
+            error: { detail: 'El paciente indicado no existe.' },
+          }),
+      ),
     );
     fillValidForm();
 
     submit();
 
-    expect(element.querySelector('.banner-error')?.textContent).toContain('El paciente indicado no existe.');
+    expect(element.querySelector('.banner-error')?.textContent).toContain(
+      'El paciente indicado no existe.',
+    );
   });
 
   it('muestra el error del API debajo del campo cuando responde 400', () => {
@@ -130,7 +143,9 @@ describe('ContactForm', () => {
     let cancelled = 0;
     fixture.componentInstance.cancelled.subscribe(() => cancelled++);
 
-    const cancel = Array.from(element.querySelectorAll('button')).find((b) => b.textContent?.includes('Cancelar'));
+    const cancel = Array.from(element.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Cancelar'),
+    );
     cancel!.click();
 
     expect(cancelled).toBe(1);

@@ -96,6 +96,16 @@ cd web
 npm test -- --watch=false
 ```
 
+Análisis de código y formato de la interfaz (ESLint con `angular-eslint` y Prettier):
+
+```
+cd web
+npm run lint
+npm run format:check
+```
+
+`npm run format` aplica el formato de Prettier a los archivos.
+
 Las de .NET son xUnit sobre la capa de servicio (SQLite en memoria); las pruebas de CA-1 llevan el prefijo `CA1_` y las de CA-2 el prefijo `CA2_`. Las de Angular usan Jasmine y Karma con el servicio simulado.
 
 ## API

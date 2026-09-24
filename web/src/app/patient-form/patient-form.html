@@ -5,7 +5,7 @@
 
   <div class="field">
     <label for="patient-fullName">Nombre completo</label>
-    <input id="patient-fullName" type="text" formControlName="fullName" autofocus />
+    <input id="patient-fullName" type="text" formControlName="fullName" />
     <app-field-error [control]="form.controls.fullName" />
   </div>
 
@@ -78,7 +78,8 @@
   <div class="field field-check">
     <label>
       <input type="checkbox" formControlName="privacyAccepted" />
-      El paciente aceptó el aviso de privacidad (texto legal pendiente de entrega por el área legal).
+      El paciente aceptó el aviso de privacidad (texto legal pendiente de entrega por el área
+      legal).
     </label>
     <app-field-error
       [control]="form.controls.privacyAccepted"

@@ -3,7 +3,12 @@ import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 
 import { App } from './app';
-import { ContactResponse, PagedResponse, PatientListItem, PatientResponse } from './models/api.models';
+import {
+  ContactResponse,
+  PagedResponse,
+  PatientListItem,
+  PatientResponse,
+} from './models/api.models';
 import { PatientForm } from './patient-form/patient-form';
 import { PatientApiService } from './services/patient-api.service';
 
@@ -29,7 +34,12 @@ const patient: PatientListItem = {
   },
 };
 
-const list: PagedResponse<PatientListItem> = { items: [patient], page: 1, pageSize: 25, totalCount: 1 };
+const list: PagedResponse<PatientListItem> = {
+  items: [patient],
+  page: 1,
+  pageSize: 25,
+  totalCount: 1,
+};
 
 describe('App', () => {
   let api: jasmine.SpyObj<PatientApiService>;
@@ -70,7 +80,9 @@ describe('App', () => {
   });
 
   function button(text: string, root: Element = element): HTMLButtonElement {
-    return Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.includes(text)) as HTMLButtonElement;
+    return Array.from(root.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes(text),
+    ) as HTMLButtonElement;
   }
 
   it('muestra al iniciar solo la lista de pacientes y el botón de nuevo paciente, sin ningún modal', () => {
@@ -95,11 +107,15 @@ describe('App', () => {
     api.listPatients.calls.reset();
 
     const created = { fullName: 'Marta Vera' } as PatientResponse;
-    fixture.debugElement.query(By.directive(PatientForm)).componentInstance.registered.emit(created);
+    fixture.debugElement
+      .query(By.directive(PatientForm))
+      .componentInstance.registered.emit(created);
     fixture.detectChanges();
 
     expect(element.querySelector('dialog')).toBeNull();
-    expect(element.querySelector('.notice')?.textContent).toContain('Paciente Marta Vera registrado correctamente.');
+    expect(element.querySelector('.notice')?.textContent).toContain(
+      'Paciente Marta Vera registrado correctamente.',
+    );
     expect(api.listPatients).toHaveBeenCalledOnceWith(1, 25);
   });
 
